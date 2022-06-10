@@ -9,6 +9,16 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from tkinter import messagebox
 
+def ping(host):
+	command = "ping "+host
+	try:
+		res = subprocess.check_output(command)
+	except:
+		return res.decode("CP866")
+
+	ou = res.decode("CP866")
+	return ou
+
 def trace(host):
 	def add_edge(f_item, s_item, graph=None):
 		graph.add_edge(f_item, s_item)
@@ -65,8 +75,10 @@ class App(Frame):
 		self.lbl.grid(column=0, row=0)
 		self.txt = Entry(window,width=50)
 		self.txt.grid(column=0, row=1)
-		self.btn = Button(window, text="Trace", command=self.clicked)
+		self.btn = Button(window, text="Trace", command=self.Tracing)
 		self.btn.grid(column=1, row=1)
+		self.btn = Button(window, text="Ping", command=self.Pinging)
+		self.btn.grid(column=1, row=0)
 		self.tex = scrolledtext.ScrolledText(window, width=65, height=33)  
 		self.tex.grid(column=0, row=2)
 		
@@ -80,12 +92,18 @@ class App(Frame):
 	def onExit(self):
 		self.quit()
 		
-	def clicked(self):
-		self.tex.insert(INSERT, ' ')
+	def Tracing(self):
+		self.tex.insert(INSERT, '\n')
 		c = self.txt.get()
 		result = trace(c)
 		self.tex.insert(INSERT, result)
 		plt.show()
+		
+	def Pinging(self):
+		self.tex.insert(INSERT, '\n')
+		c = self.txt.get()
+		result = ping(c)
+		self.tex.insert(INSERT, result)
 		
 	def centerWindow(self):
 		w = 620
