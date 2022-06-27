@@ -1,17 +1,37 @@
-from tkinter import *
+# -----------------------------------------------------------
+# Open Source information gathering of host project
+#
+# (C) 2022 Fedor Alekseev, Novosibirsk, Russia
+# Released under GNU Public License (GPL)
+# email fedor.alekseev13@yandex.ru
+# -----------------------------------------------------------
+
+
+from tkinter import Tk, INSERT
 from tkinter import scrolledtext 
-from tkinter import Tk, BOTH, Menu
+from tkinter import Tk, BOTH, Menu, Label, Entry
 from tkinter.ttk import Frame, Button, Style
 from tkinter import messagebox as mbox
-import matplotlib.pyplot as plt
-import subprocess
-import networkx as nx
-import matplotlib.pyplot as plt
-from tkinter import messagebox
 
-#Singleton - include ping, trace methods
+import matplotlib.pyplot as plt
+import networkx as nx
+
+import subprocess
+
+
 class Tools():
-	def ping(self, host) -> "PingError":
+
+	"""
+	Singleton class that defines methods for working with the network, 
+	and methods for presenting information in a graphical interface
+	"""
+	
+	def ping(self, host) -> "CriticalPingError":
+	
+		"""
+		The ping method uses the standard ping command to get 
+		the following information: connection success, connection time
+		"""
 	
 		command = "ping "+host
 		try:
@@ -22,7 +42,15 @@ class Tools():
 		output_result = res.decode("CP866") #Windows decoding
 		return output_result
 
-	def trace(self, host) -> "TraceError":
+
+	def trace(self, host) -> "CriticalTraceError":
+	
+		"""
+		The trace method uses the standard tracert command to get 
+		the following information: connection success, connection time, 
+		IP address of intermediate host
+		"""
+	
 		#connecting points in graph
 		def add_edge(f_item, s_item, graph=None):
 			graph.add_edge(f_item, s_item)
@@ -40,11 +68,11 @@ class Tools():
 		
 		temp = []
 		for i in output_result:
-			if("Превышен" not in i):	#doesnt include failed connections
+			if("Превышен" not in i):	#Doesnt include failed connections
 				temp.append(i.split("	"))
 		temp = temp[1:-1]
 
-		graph = nx.Graph()
+		graph = nx.Graph() #NetworkX object
 		points = []
 		
 		j = 0
@@ -65,16 +93,22 @@ class Tools():
 
 		return returnable_text
 	
-#UI Class with logic
+
 class App(Frame):
+
+	"""
+	Application class. It implements all logic of the graphical interface
+	and the connection with the methods of Tools class
+	"""
+
 	def __init__(self, parent, tools):
 		Frame.__init__(self, parent)
 		self.parent = parent
-		self.СenterWindow()
-		self.initUI()
+		self.__СenterWindow()
+		self.__initUI()
 		self.tools = tools
  
-	def initUI(self):
+	def __initUI(self):
 		window = self.parent
 		window.title("_ToTrace_")
 		
@@ -84,10 +118,10 @@ class App(Frame):
 		self.txt = Entry(window,width=50)
 		self.txt.grid(column=0, row=1)
 		
-		self.btn_trace = Button(window, text="Trace", command=self.Tracing)
+		self.btn_trace = Button(window, text="Trace", command=self._Tracing)
 		self.btn_trace.grid(column=1, row=1)
 		
-		self.btn_ping = Button(window, text="Ping", command=self.Pinging)
+		self.btn_ping = Button(window, text="Ping", command=self._Pinging)
 		self.btn_ping.grid(column=1, row=0)
 		
 		self.scrtxt = scrolledtext.ScrolledText(window, width=65, height=33)  
@@ -96,28 +130,28 @@ class App(Frame):
 		menubar = Menu(self.master)
 		self.master.config(menu=menubar)
 		fileMenu = Menu(menubar)
-		fileMenu.add_command(label="Exit", command=self.Exit)
+		fileMenu.add_command(label="Exit", command=self.__Exit)
 		menubar.add_cascade(label="Menu", menu=fileMenu)
  
-	def Exit(self):
+	def __Exit(self):
 		self.quit()
 		
-	def Tracing(self):
+	def _Tracing(self):
 		self.scrtxt.insert(INSERT, '\n')
 		text_from_txt = self.txt.get()
-		
 		result = self.tools.trace(text_from_txt)
 		self.scrtxt.insert(INSERT, result)
+		
 		plt.show()
 		
-	def Pinging(self):
+	def _Pinging(self):
 		self.scrtxt.insert(INSERT, '\n')
 		text_from_txt = self.txt.get()
-		
 		result = self.tools.ping(text_from_txt)
 		self.scrtxt.insert(INSERT, result)
 		
-	def СenterWindow(self):
+	def __СenterWindow(self):
+	#Centering app window on screen, using info of you screen
 		w = 620
 		h = 600
 		sw = self.parent.winfo_screenwidth()
