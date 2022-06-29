@@ -136,19 +136,22 @@ class App(Frame):
 	def __Exit(self):
 		self.quit()
 		
+	def __Tool_Wrapper(self, f):
+		def Wrapped():
+			self.scrtxt.insert(INSERT, '\n')
+			text_from_txt = self.txt.get()
+			result = f(text_from_txt)
+			self.scrtxt.insert(INSERT, result)
+		return Wrapped
+	
 	def _Tracing(self):
-		self.scrtxt.insert(INSERT, '\n')
-		text_from_txt = self.txt.get()
-		result = self.tools.trace(text_from_txt)
-		self.scrtxt.insert(INSERT, result)
-		
+		c = self.__Tool_Wrapper(self.tools.trace)
+		c()
 		plt.show()
 		
 	def _Pinging(self):
-		self.scrtxt.insert(INSERT, '\n')
-		text_from_txt = self.txt.get()
-		result = self.tools.ping(text_from_txt)
-		self.scrtxt.insert(INSERT, result)
+		c = self.__Tool_Wrapper(self.tools.ping)
+		c()
 		
 	def __СenterWindow(self):
 	#Centering app window on screen, using info of you screen
